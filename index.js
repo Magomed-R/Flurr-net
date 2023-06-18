@@ -4,7 +4,7 @@ let dayjs = require("dayjs");
 
 let express = require(`express`);
 let app = express();
-let port = 3000;
+let port = 3005;
 
 const bcrypt = require(`bcryptjs`);
 
@@ -18,7 +18,7 @@ app.use(express.json());
 
 let cors = require("cors");
 
-app.use(cors({ origin: "http://192.168.42.208" }));
+app.use(cors({ origin: "http://192.168.42.208:3000" }));
 
 try {
     app.listen(port, () => console.log(`its works!`));
