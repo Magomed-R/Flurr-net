@@ -1,0 +1,376 @@
+<script>
+import axios from 'axios'
+
+export default {
+    data() {
+        return {
+            username: "",
+            password: "",
+            error: null
+        }
+    },
+    methods: {
+        login() {
+            axios.post(`/auth`, {
+                username: this.username,
+                password: this.password
+            }).then(response => {
+                localStorage._id = response.data._id
+                localStorage.username = this.username
+                localStorage.password = this.password
+
+                this.$router.push('/news');
+                this.$router.go();
+            }).catch(error => {
+                let status = error.response.status
+                if (status == 401) {
+                    this.error = "Аккаунт не найден"
+                } else if (status == 403) {
+                    this.error = "Пароль неверный"
+                } else {
+                    this.error = "Ошибка. Повторите попытку"
+                }
+            })
+
+        }
+    }
+}
+</script>
+
+<template>
+    <div>
+        <form @submit.prevent="login">
+            <h2>Вход в <span class="logotype">Flurr</span></h2>
+
+            <input v-model="username" type="text" class="input username" placeholder="Никнейм" />
+            <input v-model="password" type="text" class="input password" placeholder="Пароль" />
+
+            <button type="submit">
+                <span class="text">Войти</span>
+            </button>
+
+            <small class="no-account">Нет аккаунта? <router-link to="/signup">Создать</router-link></small>
+
+            <small v-if="error" class="error">{{ error }}</small>
+        </form>
+    </div>
+</template>
+
+<style lang="scss" scoped>
+div {
+    width: 100vw;
+    height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    justify-content: center;
+
+    color: black;
+
+    background: round url("@/assets/background.jfif");
+    background-color: #fff;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    form {
+        font-family: "Montserrat";
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        background-color: #fff;
+        box-shadow: 0 0 10px #000;
+
+        border-radius: 0.5rem;
+
+        width: 320px;
+        height: fit-content;
+
+        padding-bottom: 10px;
+
+        span.logotype {
+            margin: 0;
+
+            animation-name: page-cover;
+            animation-duration: 10s;
+            animation-timing-function: linear;
+            animation-iteration-count: 999;
+            animation-direction: alternate;
+
+            @keyframes page-cover {
+                0% {
+                    color: rgb(255, 0, 0);
+                }
+
+                25% {
+                    color: rgb(188, 255, 2);
+                }
+
+                50% {
+                    color: rgb(187, 255, 0);
+                }
+
+                75% {
+                    color: rgb(0, 221, 255);
+                }
+
+                100% {
+                    color: rgb(244, 33, 255);
+                }
+            }
+        }
+
+        .terms {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+
+            margin: 20px 0 0 0;
+        }
+
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+
+        small {
+            padding: 0;
+            margin: 0;
+
+            &:nth-child(2) {
+                font-size: 12px;
+            }
+        }
+
+        .error {
+            text-align: center;
+            color: red;
+
+            margin-top: 20px;
+
+            border-radius: 0.25em;
+            border: 1px solid red;
+            width: 300px;
+            padding: 10px 0;
+            background-color: rgba($color: #ff0000, $alpha: 0.15);
+        }
+
+        .no-account {
+            margin: 20px 0;
+        }
+    }
+
+    .cbx {
+        position: relative;
+        top: 1px;
+        width: 17px;
+        height: 17px;
+        border: 1px solid #c8ccd4;
+        border-radius: 3px;
+        -webkit-transition: background 0.1s ease;
+        transition: background 0.1s ease;
+        cursor: pointer;
+        display: block;
+    }
+
+    .cbx:after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 6px;
+        width: 4px;
+        height: 8px;
+        opacity: 0;
+        -webkit-transform: rotate(45deg) scale(0);
+        -ms-transform: rotate(45deg) scale(0);
+        transform: rotate(45deg) scale(0);
+        border-right: 2px solid #fff;
+        border-bottom: 2px solid #fff;
+        -webkit-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+        -webkit-transition-delay: 0.15s;
+        transition-delay: 0.15s;
+    }
+
+    .lbl {
+        margin-left: 5px;
+        vertical-align: middle;
+        cursor: pointer;
+    }
+
+    #cbx:checked~.cbx {
+        border-color: transparent;
+        background: #6871f1;
+        -webkit-animation: jelly 0.6s ease;
+        animation: jelly 0.6s ease;
+    }
+
+    #cbx:checked~.cbx:after {
+        opacity: 1;
+        -webkit-transform: rotate(45deg) scale(1);
+        -ms-transform: rotate(45deg) scale(1);
+        transform: rotate(45deg) scale(1);
+    }
+
+    .cntr {
+        position: relative;
+    }
+
+    @-webkit-keyframes jelly {
+        from {
+            -webkit-transform: scale(1, 1);
+            transform: scale(1, 1);
+        }
+
+        30% {
+            -webkit-transform: scale(1.25, 0.75);
+            transform: scale(1.25, 0.75);
+        }
+
+        40% {
+            -webkit-transform: scale(0.75, 1.25);
+            transform: scale(0.75, 1.25);
+        }
+
+        50% {
+            -webkit-transform: scale(1.15, 0.85);
+            transform: scale(1.15, 0.85);
+        }
+
+        65% {
+            -webkit-transform: scale(0.95, 1.05);
+            transform: scale(0.95, 1.05);
+        }
+
+        75% {
+            -webkit-transform: scale(1.05, 0.95);
+            transform: scale(1.05, 0.95);
+        }
+
+        to {
+            -webkit-transform: scale(1, 1);
+            transform: scale(1, 1);
+        }
+    }
+
+    @keyframes jelly {
+        from {
+            -webkit-transform: scale(1, 1);
+            transform: scale(1, 1);
+        }
+
+        30% {
+            -webkit-transform: scale(1.25, 0.75);
+            transform: scale(1.25, 0.75);
+        }
+
+        40% {
+            -webkit-transform: scale(0.75, 1.25);
+            transform: scale(0.75, 1.25);
+        }
+
+        50% {
+            -webkit-transform: scale(1.15, 0.85);
+            transform: scale(1.15, 0.85);
+        }
+
+        65% {
+            -webkit-transform: scale(0.95, 1.05);
+            transform: scale(0.95, 1.05);
+        }
+
+        75% {
+            -webkit-transform: scale(1.05, 0.95);
+            transform: scale(1.05, 0.95);
+        }
+
+        to {
+            -webkit-transform: scale(1, 1);
+            transform: scale(1, 1);
+        }
+    }
+
+    .hidden-xs-up {
+        display: none !important;
+    }
+
+    .input {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+        font-weight: 500;
+        font-size: 16px;
+        color: #000;
+        background-color: #fff;
+        box-shadow: 0 0 0.4vw rgba(0, 0, 0, 0.5), 0 0 0 0.15vw transparent;
+        border-radius: 0.4vw;
+        border: none;
+        outline: none;
+        padding: 8px;
+        min-width: 250px;
+        max-width: 350px;
+        transition: 0.4s;
+
+        margin-top: 10px;
+    }
+
+    .input:hover {
+        box-shadow: 0 0 0 0.15vw rgba(135, 207, 235, 0.186);
+    }
+
+    .input:focus {
+        box-shadow: 0 0 0 0.15vw skyblue;
+    }
+
+    button {
+        margin-top: 40px;
+        align-items: center;
+        background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+        border: 0;
+        border-radius: 8px;
+        box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+        box-sizing: border-box;
+        color: #000;
+        display: flex;
+        font-family: Phantomsans, sans-serif;
+        font-size: 16px;
+        justify-content: center;
+        line-height: 1em;
+        max-width: 100%;
+        min-width: 140px;
+        padding: 3px;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-sizing: border-box;
+
+        span {
+            background-color: #bbf;
+            border-radius: 6px;
+            padding: 8px 18px;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            transition: 300ms;
+        }
+    }
+
+    button:hover span {
+        background: none;
+        color: #fff;
+    }
+
+    button:active {
+        transform: scale(0.9);
+    }
+}
+</style>
