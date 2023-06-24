@@ -76,7 +76,7 @@ export default {
             }" :class="{ 'empty-avatar': !userProfile.avatar }"></div>
             <div class="info__username">
                 <h2 v-html="userProfile.username"></h2><img v-if="userProfile.gender"
-                    :src="`@/assets/${userProfile.gender}.png`">
+                    :src="(userProfile.gender == 'male') ? 'https://i.ibb.co/SPbnhrg/male.png' : 'https://i.ibb.co/dfd5JYp/female.png'">
             </div>
             <button v-if="!(userProfile._id == localStorage._id) && !(user.friends.includes(userProfile._id))"
                 @click="addFriend()">

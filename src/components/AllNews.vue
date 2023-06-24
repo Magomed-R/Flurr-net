@@ -51,6 +51,9 @@ export default {
         getDate(date) {
             let day = dayjs(date)
             return day.format(`HH:mm DD.MM.YY`)
+        },
+        goProfile(user) {
+            this.$router.replace(`/profile-` + user._id)
         }
 
     },
@@ -63,7 +66,7 @@ export default {
 <template>
     <section class="new__list">
         <article v-for="(item, index) in news" class="new__body" :key="item._id">
-            <div class="new__header">                
+            <div class="new__header" @click="goProfile(item.author)">                
                 <div class="new__avatar" :style="{
                     backgroundImage: 'url(' + item.author.avatar + ')',
                     backgroundPosition: 'center center',
@@ -78,7 +81,7 @@ export default {
             <div class="new__footer">
                 <div class="new__reactions">
                     <div class="new__likes" @click="likeNews(item)">
-                        <img :src="`@/assets/` + ((user.likedNews.includes(item._id)) ? `liked.png` : `unliked.png`)" />
+                        <img :src="(user.likedNews.includes(item._id) ? `https://i.ibb.co/8zct618/liked.png` : `https://i.ibb.co/vd3TQ5p/unliked.png`)" />
                         <span class="new__likes-number">{{ item.likes }}</span>
                     </div>
 

@@ -5,9 +5,11 @@ import dayjs from 'dayjs'
 export default {
     data() {
         return {
+            user: null,
             news: null,
             readyToLike: true,
-            comment: ''
+            comment: '',
+            dataLoaded: false
         }
     },
     methods: {
@@ -15,6 +17,18 @@ export default {
             try {
                 let response = await axios.get(`/news/one`, { params: { id: this.$route.params.id } })
                 this.news = response.data
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        async loadUser() {
+            try {
+                let response = await axios.get(`/find/user`, {
+                    params: {
+                        id: localStorage._id
+                    }
+                })
+                this.user = response.data
             } catch (error) {
                 console.log(error)
             }
@@ -32,11 +46,11 @@ export default {
                 })
 
                 if (response.data == 'unlike') {
-                    let i = this.$props.user.likedNews.indexOf(item._id)
-                    this.$props.user.likedNews.splice(i, 1)
+                    let i = this.user.likedNews.indexOf(item._id)
+                    this.user.likedNews.splice(i, 1)
                     item.likes--
                 } else {
-                    this.$props.user.likedNews.push(item._id)
+                    this.user.likedNews.push(item._id)
                     item.likes++
                 }
 
@@ -64,21 +78,18 @@ export default {
             }
         }
     },
-    props: {
-        user: {
-            type: Object
-        }
-    },
     async created() {
         await this.loadNews()
+        await this.loadUser()
+        this.dataLoaded = true
     }
 }
 </script>
 
 <template>
-    <div v-if="news">
+    <div v-if="user && news">
         <article class="new__body">
-            <div class="new__header">
+            <div class="new__header" @click="goProfile(news.author)">
                 <div class="new__avatar" :style="{
                     backgroundImage: 'url(' + news.author.avatar + ')',
                     backgroundPosition: 'center center',
@@ -95,7 +106,8 @@ export default {
             <div class="new__footer">
                 <div class="new__reactions">
                     <div class="new__likes" @click="likeNews(news)">
-                        <img :src="`@/assets/` + ((user.likedNews.includes(news._id)) ? `liked.png` : `unliked.png`)" />
+                        <img
+                            :src="(user.likedNews.includes(news._id) ? `https://i.ibb.co/8zct618/liked.png` : `https://i.ibb.co/vd3TQ5p/unliked.png`)" />
 
                         <span class="new__likes-number">{{ news.likes }}</span>
                     </div>
@@ -118,7 +130,7 @@ export default {
                         backgroundImage: 'url(' + item.user.avatar + ')',
                         backgroundPosition: 'center center',
                         backgroundSize: 'cover'
-                    }" :class="{'empty-avatar': !item.user.avatar}"></div>
+                    }" :class="{ 'empty-avatar': !item.user.avatar }"></div>
 
                     <p v-html="item.user.username"></p>
 
@@ -238,6 +250,8 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+
+    margin-bottom: 60px;
 
     .comment__body {
         display: flex;

@@ -18,7 +18,7 @@ app.use(express.json());
 
 let cors = require("cors");
 
-app.use(cors({ origin: "http://158.160.10.20:3000" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 try {
     app.listen(port, () => console.log(`its works!`));
