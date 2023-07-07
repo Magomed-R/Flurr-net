@@ -2,7 +2,6 @@
 import axios from 'axios'
 import dayjs from 'dayjs';
 let day = dayjs();
-let format = day.format('HH:mm');
 
 export default {
     data() {
@@ -15,11 +14,7 @@ export default {
     methods: {
         async loadUser() {
             try {
-                let response = await axios.get(`/find/user`, {
-                    params: {
-                        id: localStorage._id
-                    }
-                })
+                let response = await axios.get(`/find/me`)
                 this.user = response.data
             } catch (error) {
                 console.log(error)
@@ -33,7 +28,7 @@ export default {
         }
     },
     async created() {
-        if (localStorage._id) {
+        if (localStorage.token) {
             await this.loadUser()
             this.dataLoaded = true
         }

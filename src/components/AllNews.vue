@@ -29,8 +29,7 @@ export default {
                 this.readyToLike = false
 
                 let response = await axios.post(`/news/likeNews`, {
-                    newsId: item._id,
-                    userId: this.user._id
+                    newsId: item._id
                 })
 
                 if (response.data == 'unlike') {

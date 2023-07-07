@@ -8,6 +8,8 @@ let port = 3005;
 
 const bcrypt = require(`bcryptjs`);
 
+const jwt = require("jsonwebtoken");
+
 const mongoose = require(`mongoose`);
 
 app.use(express.urlencoded({ extended: true }));
@@ -121,7 +123,11 @@ const newSchema = new mongoose.Schema(
 
 const New = mongoose.model(`new`, newSchema);
 
-app.post(`/auth`, async (req, res) => {
+app.post(`/auth`, authenticateCheck, (req, res) => {
+    res.sendStatus(200);
+});
+
+app.post(`/login`, authCheck, async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
 
@@ -132,7 +138,10 @@ app.post(`/auth`, async (req, res) => {
         } else if (!(await bcrypt.compare(password, user.password))) {
             res.sendStatus(403);
         } else {
-            res.send(user);
+            let data = { id: user._id };
+            const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
+
+            res.send({ accessToken: accessToken });
         }
     } catch (error) {
         console.log(error);
@@ -140,25 +149,7 @@ app.post(`/auth`, async (req, res) => {
     }
 });
 
-app.get(`/find/user`, async function (req, res) {
-    let id = req.query.id;
-
-    try {
-        let user = await User.findOne({ _id: id });
-
-        if (!user) {
-            res.sendStatus(404);
-        } else {
-            res.send(user);
-        }
-    } catch (error) {
-        console.log(error);
-
-        res.sendStatus(410);
-    }
-});
-
-app.post(`/signup`, async (req, res) => {
+app.post(`/signup`, authCheck, async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
 
@@ -187,7 +178,11 @@ app.post(`/signup`, async (req, res) => {
             await user.save();
 
             user = await User.findOne({ username: username });
-            res.send(user);
+
+            let data = { id: user._id };
+            const accessToken = jwt.sign(data, process.env.ACCESS_TOKEN_SECRET);
+
+            res.send({ accessToken: accessToken });
         } else {
             res.sendStatus(409);
         }
@@ -198,7 +193,43 @@ app.post(`/signup`, async (req, res) => {
     }
 });
 
-app.get(`/find/user/length`, function (req, res) {
+app.get(`/find/me`, authenticateCheck, async function (req, res) {
+    id = req.user.id;
+
+    try {
+        let user = await User.findOne({ _id: id });
+
+        if (!user) {
+            res.sendStatus(404);
+        } else {
+            res.send(user);
+        }
+    } catch (error) {
+        console.log(error);
+
+        res.sendStatus(410);
+    }
+});
+
+app.get(`/find/user`, authenticateCheck, async function (req, res) {
+    let id = req.query.id;
+
+    try {
+        let user = await User.findOne({ _id: id });
+
+        if (!user) {
+            res.sendStatus(404);
+        } else {
+            res.send(user);
+        }
+    } catch (error) {
+        console.log(error);
+
+        res.sendStatus(410);
+    }
+});
+
+app.get(`/find/user/length`, authCheck, function (req, res) {
     User.find()
         .then((users) => {
             res.send(users);
@@ -209,7 +240,7 @@ app.get(`/find/user/length`, function (req, res) {
         });
 });
 
-app.get(`/news/all`, async function (req, res) {
+app.get(`/news/all`, authenticateCheck, async function (req, res) {
     try {
         let news = await New.find().sort({ createdAt: -1 }).populate("author");
 
@@ -220,7 +251,7 @@ app.get(`/news/all`, async function (req, res) {
     }
 });
 
-app.get(`/news/one`, async function (req, res) {
+app.get(`/news/one`, authenticateCheck, async function (req, res) {
     let id = req.query.id;
 
     try {
@@ -232,7 +263,7 @@ app.get(`/news/one`, async function (req, res) {
     }
 });
 
-app.post(`/news/newComment`, async function (req, res) {
+app.post(`/news/newComment`, authenticateCheck, async function (req, res) {
     let userId = req.body.userId;
     let newsId = req.body.newsId;
     let text = req.body.text;
@@ -260,9 +291,9 @@ app.post(`/news/newComment`, async function (req, res) {
     }
 });
 
-app.post(`/news/likeNews`, async function (req, res) {
+app.post(`/news/likeNews`, authenticateCheck, async function (req, res) {
     let newsId = req.body.newsId;
-    let userId = req.body.userId;
+    let userId = req.user.id;
 
     try {
         let news = await New.findOne({ _id: newsId });
@@ -292,8 +323,8 @@ app.post(`/news/likeNews`, async function (req, res) {
     }
 });
 
-app.post(`/addFriend`, async function (req, res) {
-    let userId = req.body.userId;
+app.post(`/addFriend`, authenticateCheck, async function (req, res) {
+    let userId = req.user.id;
     let userFriendId = req.body.userFriendId;
 
     try {
@@ -323,9 +354,9 @@ app.post(`/addFriend`, async function (req, res) {
     }
 });
 
-app.get(`/dialog/all`, async function (req, res) {
+app.get(`/dialog/all`, authenticateCheck, async function (req, res) {
     try {
-        let userId = req.query.id;
+        let userId = req.user.id;
         let user = await User.findOne({ _id: userId }).populate("chats");
         await user.populate("chats.members");
 
@@ -336,9 +367,9 @@ app.get(`/dialog/all`, async function (req, res) {
     }
 });
 
-app.post(`/dialog/newMessage`, async function (req, res) {
+app.post(`/dialog/newMessage`, authenticateCheck, async function (req, res) {
     let chatId = req.body.chatId;
-    let userId = req.body.userId;
+    let userId = req.user.id;
     let message = req.body.message;
 
     try {
@@ -360,12 +391,12 @@ app.post(`/dialog/newMessage`, async function (req, res) {
         }
     } catch (error) {
         console.log(error);
-        res.send(400);
+        res.sendStatus(400);
     }
 });
 
-app.get(`/friends/my`, async function (req, res) {
-    let id = req.query.id;
+app.get(`/friends/my`, authenticateCheck, async function (req, res) {
+    let id = req.user.id;
 
     try {
         let user = await User.findOne({ _id: id }).populate("friends");
@@ -382,8 +413,8 @@ app.get(`/friends/my`, async function (req, res) {
     }
 });
 
-app.get(`/friends/possible`, async function (req, res) {
-    let id = req.query.id;
+app.get(`/friends/possible`, authenticateCheck, async function (req, res) {
+    let id = req.user.id;
 
     try {
         let user = await User.findOne({ _id: id });
@@ -397,12 +428,12 @@ app.get(`/friends/possible`, async function (req, res) {
     } catch (error) {
         console.log(error);
 
-        res.sendStatus(410);
+        res.sendStatus(418);
     }
 });
 
-app.post(`/deleteFriend`, async function (req, res) {
-    let userId = req.body.userId;
+app.post(`/deleteFriend`, authenticateCheck, async function (req, res) {
+    let userId = req.user.id;
     let userFriendId = req.body.userFriendId;
 
     try {
@@ -434,7 +465,7 @@ app.post(`/deleteFriend`, async function (req, res) {
     }
 });
 
-app.post(`/settings/new`, async function (req, res) {
+app.post(`/settings/new`, authenticateCheck, async function (req, res) {
     let account = req.body.user;
 
     if (!account.username) {
@@ -462,3 +493,35 @@ app.post(`/settings/new`, async function (req, res) {
         }
     }
 });
+
+function authenticateCheck(req, res, next) {
+    const token = req.headers["authorization"];
+
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (error, user) => {
+        if (error) {
+            console.log(error);
+            return res.sendStatus(403);
+        }
+
+        let account = await User.findOne({ _id: user.id });
+        if (!account) return res.sendStatus(401);
+        req.user = user;
+        next();
+    });
+}
+
+function authCheck(req, res, next) {
+    const token = req.headers["authorization"];
+
+    if (!token) return next();
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (error, user) => {
+        if (error) return next();
+
+        let account = await User.findOne({ _id: user.id });
+        if (!account) return next();
+        res.sendStatus(200);
+    });
+}

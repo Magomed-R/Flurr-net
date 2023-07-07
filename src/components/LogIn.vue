@@ -11,13 +11,11 @@ export default {
     },
     methods: {
         login() {
-            axios.post(`/auth`, {
+            axios.post(`/login`, {
                 username: this.username,
                 password: this.password
             }).then(response => {
-                localStorage._id = response.data._id
-                localStorage.username = this.username
-                localStorage.password = this.password
+                localStorage.token = response.data.accessToken
 
                 this.$router.push('/news');
                 this.$router.go();

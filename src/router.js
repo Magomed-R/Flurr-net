@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
-axios.defaults.baseURL = 'http://localhost:3005';
+axios.defaults.baseURL = "http://localhost:3005";
 axios.defaults.headers.common["Content-type"] = "application/json";
 
 import AppHeader from "./components/AppHeader.vue";
@@ -12,8 +12,8 @@ import UserProfile from "./components/UserProfile.vue";
 import NewsComments from "./components/NewsComments.vue";
 import FriendsPage from "./components/FriendsPage.vue";
 import RulesPage from "./components/RulesPage.vue";
-import UserSettings from "./components/UserSettings.vue"
-import AboutUs from "./components/AboutUs.vue"
+import UserSettings from "./components/UserSettings.vue";
+import AboutUs from "./components/AboutUs.vue";
 
 const routes = [
     {
@@ -123,15 +123,12 @@ const router = createRouter({
 
 async function isAuthenticated() {
     try {
-        let response = await axios.post(`/auth`, {
-            username: localStorage.username,
-            password: localStorage.password
-        });
+        let response = await axios.post(`/auth`);
 
-        if (response.code == "ERR_BAD_REQUEST") {
-            return false;
-        } else {
+        if (response.status == 200) {
             return true;
+        } else {
+            return false;
         }
     } catch (error) {
         return false;
@@ -139,11 +136,12 @@ async function isAuthenticated() {
 }
 
 router.beforeEach(async (to, from, next) => {
-    if ((await isAuthenticated()) && to.meta.requiresAuth) {
+    let isAuthenticate = await isAuthenticated();
+    if (isAuthenticate && to.meta.requiresAuth) {
         next();
-    } else if ((await isAuthenticated()) && !to.meta.requiresAuth) {
+    } else if (isAuthenticate && !to.meta.requiresAuth) {
         next("/news");
-    } else if (!(await isAuthenticated()) && to.meta.requiresAuth) {
+    } else if (!isAuthenticate && to.meta.requiresAuth) {
         next("/login");
     } else if (to.href == "/") {
         next("/login");

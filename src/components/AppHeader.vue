@@ -30,11 +30,11 @@ export default {
             }
         },
         goProfile() {
-            this.$router.replace(`/profile-`+localStorage._id)
+            this.$router.push(`/profile-` + this.user._id)
         },
         logout() {
             localStorage.clear()
-            this.$router.replace("/signup")
+            window.location.href = '/signup'
         }
     }
 }

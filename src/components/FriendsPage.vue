@@ -14,7 +14,7 @@ export default {
     methods: {
         async loadUser() {
             try {
-                let response = await axios.get(`/friends/my`, { params: { id: localStorage._id } })
+                let response = await axios.get(`/friends/my`)
                 this.user = response.data
             } catch (error) {
                 console.log(error)
@@ -22,7 +22,7 @@ export default {
         },
         async loadPosFriends() {
             try {
-                let response = await axios.get(`/friends/possible`, { params: { id: localStorage._id } })
+                let response = await axios.get('/friends/possible')
                 this.posFriends = response.data
             } catch (error) {
                 console.log(error)
@@ -32,7 +32,6 @@ export default {
             if (this.readyToAdd) {
                 this.readyToAdd = false
                 let response = await axios.post(`/addFriend`, {
-                    userId: this.user._id,
                     userFriendId: item._id
                 })
 
@@ -47,7 +46,6 @@ export default {
             if (this.readyToDelete) {
                 this.readyToDelete = false
                 let response = await axios.post(`/deleteFriend`, {
-                    userId: this.user._id,
                     userFriendId: item._id
                 })
 

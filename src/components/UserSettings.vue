@@ -1,5 +1,6 @@
 <script>
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 export default {
     data() {
@@ -10,8 +11,9 @@ export default {
     },
     methods: {
         async loadUser() {
-            let response = await axios.get(`/find/user`, { params: { id: localStorage._id } })
+            let response = await axios.get(`/find/me`)
             this.user = response.data
+            this.user.birthday = dayjs(this.user.birthday).format('YYYY-MM-DD')
         },
         async saveSettings () {
             try {
@@ -20,7 +22,7 @@ export default {
                 let response = await axios.post(`/settings/new`, {user: this.user})
 
                 if (response.status == 200) {
-                    this.$router.replace("/profile-"+localStorage._id)
+                    this.$router.replace("/profile-"+this.user._id)
                 }
             } catch (error) {
                 let status = error.response.status

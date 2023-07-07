@@ -36,7 +36,7 @@
         <hr>
 
         <p>На данный момент ведётся работа над улучшением приложения. Спасибо за проявленный интерес к проекту!</p>
-        <p style="position: absolute; bottom: 0; text-align: center; right: 0; left: 0;">Текущая версия - 1.0.0</p>
+        <p style="position: absolute; bottom: 0; text-align: center; right: 0; left: 0;">Текущая версия - 1.1.0</p>
     </div>
 </template>
 

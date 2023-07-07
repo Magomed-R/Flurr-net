@@ -23,11 +23,7 @@ export default {
         },
         async loadUser() {
             try {
-                let response = await axios.get(`/find/user`, {
-                    params: {
-                        id: localStorage._id
-                    }
-                })
+                let response = await axios.get(`/find/me`)
                 this.user = response.data
             } catch (error) {
                 console.log(error)

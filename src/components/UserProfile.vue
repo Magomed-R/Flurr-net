@@ -18,7 +18,7 @@ export default {
             this.userProfile = response.data
         },
         async loadUser() {
-            let response = await axios.get(`/find/user`, { params: { id: localStorage._id } })
+            let response = await axios.get(`/find/me`)
             this.user = response.data
         },
         getAge() {
@@ -78,12 +78,12 @@ export default {
                 <h2 v-html="userProfile.username"></h2><img v-if="userProfile.gender"
                     :src="(userProfile.gender == 'male') ? 'https://i.ibb.co/SPbnhrg/male.png' : 'https://i.ibb.co/dfd5JYp/female.png'">
             </div>
-            <button v-if="!(userProfile._id == localStorage._id) && !(user.friends.includes(userProfile._id))"
+            <button v-if="!(userProfile._id == user._id) && !(user.friends.includes(userProfile._id))"
                 @click="addFriend()">
                 <img v-if="readyToAdd" src="@/assets/addfriend.svg" alt="add friend">
                 <img v-else src="@/assets/loading.gif" alt="add friend">
             </button>
-            <button v-if="!(userProfile._id == localStorage._id) && (user.friends.includes(userProfile._id))"
+            <button v-if="!(userProfile._id == user._id) && (user.friends.includes(userProfile._id))"
                 @click="goDialogs()">
                 <img src="@/assets/typing.png" alt="go dialog">
             </button>

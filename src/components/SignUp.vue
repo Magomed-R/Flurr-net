@@ -24,10 +24,8 @@ export default {
                         password: this.password
                     })
                     
-                    localStorage._id = response.data._id
-                    localStorage.username = this.username
-                    localStorage.password = this.password
-
+                    localStorage.token = response.data.accessToken
+                    
                     this.$router.go()
                 } catch (error) {
                     console.log(error)

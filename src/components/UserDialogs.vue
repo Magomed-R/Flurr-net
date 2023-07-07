@@ -15,7 +15,7 @@ export default {
     methods: {
         async loadDialogs() {
             try {
-                let response = await axios.get(`/dialog/all`, { params: { id: localStorage._id } })
+                let response = await axios.get(`/dialog/all`)
 
                 this.user = response.data
             } catch (error) {
@@ -35,7 +35,6 @@ export default {
             try {
                 let response = await axios.post(`/dialog/newMessage`, {
                     chatId: this.user.chats[this.nowOpen]._id,
-                    userId: this.user._id,
                     message: this.draft
                 })
 
@@ -252,6 +251,10 @@ export default {
 
                 span {
                     font-size: 20px;
+                }
+
+                .empty-avatar {
+                    background-image: url("@/assets/empty account.svg") !important;
                 }
             }
         }
