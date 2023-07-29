@@ -22,106 +22,23 @@ let cors = require("cors");
 
 app.use(cors({ origin: "http://localhost:5173" }));
 
+const chalk = require("chalk");
+
 try {
-    app.listen(port, () => console.log(`its works!`));
+    app.listen(port, () => console.log(chalk.bgGreen(`its works!`)));
     mongoose
         .connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`)
-        .then(() => console.log("Connected to DB"))
+        .then((res) => console.log(chalk.bgGreen("Connected to DB")))
         .catch((error) => console.log(error));
-} catch (e) {
-    console.log(e);
+} catch (error) {
+    console.log(error);
 }
 
-const chatSchema = new mongoose.Schema(
-    {
-        members: [
-            {
-                type: mongoose.ObjectId,
-                ref: "user"
-            }
-        ],
-        messages: [
-            {
-                from: String,
-                message: String,
-                createdAt: Date
-            }
-        ]
-    },
-    {
-        timestamps: true
-    }
-);
+let Chat = require("./Models/Chat");
 
-const Chat = mongoose.model(`chat`, chatSchema);
+let User = require("./Models/User");
 
-const userSchema = new mongoose.Schema(
-    {
-        username: {
-            type: String,
-            required: true,
-            unique: true
-        },
-        password: {
-            type: String,
-            required: true
-        },
-        aboutme: String,
-        avatar: String,
-        gender: String,
-        admin: Boolean,
-        birthday: {
-            type: Date
-        },
-        likedNews: [String],
-        friends: [
-            {
-                type: mongoose.ObjectId,
-                ref: "user"
-            }
-        ],
-        chats: [
-            {
-                type: mongoose.ObjectId,
-                ref: "chat"
-            }
-        ]
-    },
-    {
-        timestamps: true
-    }
-);
-
-const User = mongoose.model(`user`, userSchema);
-
-const newSchema = new mongoose.Schema(
-    {
-        author: {
-            type: mongoose.ObjectId,
-            ref: "user"
-        },
-        content: String,
-        likes: Number,
-        comments: [
-            {
-                user: {
-                    type: mongoose.ObjectId,
-                    ref: "user"
-                },
-                text: {
-                    type: String,
-                    required: true
-                },
-                createdAt: Date
-            }
-        ]
-    },
-    {
-        timestamps: true
-    }
-);
-
-const New = mongoose.model(`new`, newSchema);
+let New = require("./Models/New");
 
 app.post(`/auth`, authenticateCheck, (req, res) => {
     res.sendStatus(200);
