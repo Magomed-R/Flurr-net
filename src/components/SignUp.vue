@@ -53,8 +53,8 @@ export default {
 <template>
     <div class="wrapper">
         <form @submit.prevent="newUser">
-            <h2>Регистрация в <span class="logotype">Flurr</span></h2>
-            <p>На Flurr уже {{ userCount }} пользователей </p>
+            <h2>Регистрация в <span class="logotype">Nettler</span></h2>
+            <p>На Nettler уже {{ userCount }} пользователей </p>
             <p>Почему вы ещё не с нами?</p>
 
             <input type="text" v-model="username" class="input username" placeholder="Никнейм" />

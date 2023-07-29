@@ -2,7 +2,7 @@
 
 <template>
     <div class="main">
-        <p>Привет! Я основатель социальной сети <span class="logotype">Flurr</span>. Если у вас есть какие-то вопросы или предложения, пожалуйста, свяжитесь со мной:</p>
+        <p>Привет! Я основатель социальной сети <span class="logotype">Nettler</span> (ранее известной как Flurr). Если у вас есть какие-то вопросы или предложения, пожалуйста, свяжитесь со мной:</p>
         <div class="links">
             <a class="text-muted" target="_blank" href="https://github.com/Magomed-R">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">

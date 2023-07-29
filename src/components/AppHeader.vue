@@ -63,7 +63,7 @@ export default {
     }" class="slidebar">
         <nav @click="closeSlidebar">
             <a href="/">
-                <p class="logotype">Flurr</p>
+                <p class="logotype">Nettler</p>
             </a>
 
             <div class="slidebar__links">

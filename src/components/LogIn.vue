@@ -38,7 +38,7 @@ export default {
 <template>
     <div>
         <form @submit.prevent="login">
-            <h2>Вход в <span class="logotype">Flurr</span></h2>
+            <h2>Вход в <span class="logotype">Nettler</span></h2>
 
             <input v-model="username" type="text" class="input username" placeholder="Никнейм" />
             <input v-model="password" type="text" class="input password" placeholder="Пароль" />
