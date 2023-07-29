@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import axios from "axios";
-axios.defaults.baseURL = "http://localhost:3005";
+axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL || "http://localhost:3010";
 axios.defaults.headers.common["Content-type"] = "application/json";
 
 import AppHeader from "./components/AppHeader.vue";

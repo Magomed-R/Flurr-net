@@ -12,6 +12,7 @@ const userSchema = new Schema(
             required: true
         },
         aboutme: String,
+        email: String,
         avatar: String,
         gender: String,
         admin: Boolean,

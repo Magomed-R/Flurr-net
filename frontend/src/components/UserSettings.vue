@@ -54,9 +54,13 @@ export default {
                 <input v-model="user.avatar" type="text" class="avatar__input">
             </div>
         </div>
-        <div class="birthday">
+        <div class="basic-input">
             <p>Дата рождения</p>
-            <input type="date" class="date" v-model="user.birthday">
+            <input type="date" v-model="user.birthday">
+        </div>
+        <div class="basic-input">
+            <p>Email</p>
+            <input type="text" placeholder="example@mail.ru" v-model="user.email">
         </div>
         <div class="gender__info">
             <p>Пол</p>
@@ -137,7 +141,7 @@ export default {
         }
     }
 
-    .birthday {
+    .basic-input {
         margin: 20px 0;
 
         input {

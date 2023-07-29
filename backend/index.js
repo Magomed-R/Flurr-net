@@ -2,30 +2,25 @@ require(`dotenv`).config();
 
 let dayjs = require("dayjs");
 
-let express = require(`express`);
-let app = express();
-let port = 3005;
+const express = require(`express`);
+const app = express();
+const port = process.env.PORT || 3010;
 
 const bcrypt = require(`bcryptjs`);
-
 const jwt = require("jsonwebtoken");
-
 const mongoose = require(`mongoose`);
-
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.static(`public`));
-
-app.use(express.json());
-
 let cors = require("cors");
 
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(`public`));
+app.use(express.json());
+
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 
 const chalk = require("chalk");
 
 try {
-    app.listen(port, () => console.log(chalk.bgGreen(`its works!`)));
+    app.listen(port, () => console.log(chalk.bgGreen(`server started on port ${port}`)));
     mongoose
         .connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`)
         .then((res) => console.log(chalk.bgGreen("Connected to DB")))
@@ -39,6 +34,8 @@ let Chat = require("./Models/Chat");
 let User = require("./Models/User");
 
 let New = require("./Models/New");
+
+let mailer = require("./nodemailer");
 
 app.post(`/auth`, authenticateCheck, (req, res) => {
     res.sendStatus(200);
@@ -302,6 +299,16 @@ app.post(`/dialog/newMessage`, authenticateCheck, async function (req, res) {
                 createdAt: dayjs().format()
             });
 
+            let memberId = chat.members.find((member) => {
+                member != userId;
+            });
+
+            let member = await User.find({ _id: memberId });
+
+            if (member.email) {
+                mailer(member.email, user.username, message);
+            }
+
             chat.save();
 
             res.sendStatus(200);
@@ -397,6 +404,7 @@ app.post(`/settings/new`, authenticateCheck, async function (req, res) {
                 user.username = account.username;
                 user.avatar = account.avatar;
                 user.birthday = account.birthday;
+                user.email = account.email;
                 user.gender = account.gender;
                 user.aboutme = account.aboutme;
 
