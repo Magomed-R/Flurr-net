@@ -66,10 +66,15 @@ app.post(`/login`, authCheck, async (req, res) => {
 app.post(`/signup`, authCheck, async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
+    let email = req?.body?.email
 
     try {
         if (password.length < 4) {
             return res.sendStatus(403);
+        }
+
+        if (!username || !email) {
+            return res.sendStatus(405)
         }
         const hashedPassword = await bcrypt.hash(password, 7);
 
@@ -79,6 +84,7 @@ app.post(`/signup`, authCheck, async (req, res) => {
             user = new User({
                 username: username,
                 password: hashedPassword,
+                email: email,
                 aboutme: ``,
                 avatar: ``,
                 gender: ``,
@@ -299,11 +305,11 @@ app.post(`/dialog/newMessage`, authenticateCheck, async function (req, res) {
                 createdAt: dayjs().format()
             });
 
-            let memberId = chat.members.find((member) => {
-                member != userId;
-            });
+            let memberId = chat.members.filter((member) => {
+                return member != userId;
+            })[0]
 
-            let member = await User.find({ _id: memberId });
+            let member = await User.findOne({ _id: memberId });
 
             if (member.email) {
                 mailer(member.email, user.username, message);
