@@ -6,6 +6,7 @@ export default {
         return {
             username: "",
             password: "",
+            email: "",
             rulesChecked: false,
             error: null,
             userCount: 0
@@ -21,7 +22,8 @@ export default {
                 try {
                     let response = await axios.post(`/signup`, {
                         username: this.username,
-                        password: this.password
+                        password: this.password,
+                        email: this.email
                     })
                     
                     localStorage.token = response.data.accessToken
@@ -32,6 +34,8 @@ export default {
                     let status = error.response.status
                     if (status == 403) {
                         this.error = "Пароль должен быть больше 4 символов"
+                    } else if (status == 405) {
+                        this.error = "Вы не ввели никнейм или почту"
                     } else if (status == 409) {
                         this.error = "Никнейм занят"
                     } else if (status == 410) {
@@ -57,6 +61,7 @@ export default {
             <p>На Nettler уже {{ userCount }} пользователей </p>
             <p>Почему вы ещё не с нами?</p>
 
+            <input type="text" v-model="email" class="input username" placeholder="Эл. почта" />
             <input type="text" v-model="username" class="input username" placeholder="Никнейм" />
             <input type="text" v-model="password" class="input password" placeholder="Пароль" />
 

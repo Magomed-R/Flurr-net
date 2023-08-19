@@ -20,9 +20,13 @@ app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 const chalk = require("chalk");
 
 try {
-    app.listen(port, () => console.log(chalk.bgGreen(`server started on port ${port}`)));
+    app.listen(port, () =>
+        console.log(chalk.bgGreen(`server started on port ${port}`))
+    );
     mongoose
-        .connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`)
+        .connect(
+            `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`
+        )
         .then((res) => console.log(chalk.bgGreen("Connected to DB")))
         .catch((error) => console.log(error));
 } catch (error) {
@@ -66,10 +70,15 @@ app.post(`/login`, authCheck, async (req, res) => {
 app.post(`/signup`, authCheck, async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
+    let email = req?.body?.email;
 
     try {
         if (password.length < 4) {
             return res.sendStatus(403);
+        }
+
+        if (!username || !email) {
+            return res.sendStatus(405);
         }
         const hashedPassword = await bcrypt.hash(password, 7);
 
@@ -79,6 +88,7 @@ app.post(`/signup`, authCheck, async (req, res) => {
             user = new User({
                 username: username,
                 password: hashedPassword,
+                email: email,
                 aboutme: ``,
                 avatar: ``,
                 gender: ``,
@@ -86,7 +96,7 @@ app.post(`/signup`, authCheck, async (req, res) => {
                 birthday: null,
                 likedNews: [],
                 friends: [],
-                chats: []
+                chats: [],
             });
 
             await user.save();
@@ -169,7 +179,9 @@ app.get(`/news/one`, authenticateCheck, async function (req, res) {
     let id = req.query.id;
 
     try {
-        let news = await New.findOne({ _id: id }).populate("author").populate("comments.user");
+        let news = await New.findOne({ _id: id })
+            .populate("author")
+            .populate("comments.user");
         res.send(news);
     } catch (error) {
         console.log(error);
@@ -192,7 +204,7 @@ app.post(`/news/newComment`, authenticateCheck, async function (req, res) {
             news.comments.push({
                 user: user._id,
                 text: text,
-                createdAt: dayjs().format()
+                createdAt: dayjs().format(),
             });
 
             news.save();
@@ -250,7 +262,7 @@ app.post(`/addFriend`, authenticateCheck, async function (req, res) {
 
         let chat = new Chat({
             members: [userId, userFriendId],
-            messages: []
+            messages: [],
         });
 
         user.chats.push(chat._id);
@@ -296,14 +308,14 @@ app.post(`/dialog/newMessage`, authenticateCheck, async function (req, res) {
             chat.messages.push({
                 from: user.username,
                 message: message,
-                createdAt: dayjs().format()
+                createdAt: dayjs().format(),
             });
 
-            let memberId = chat.members.find((member) => {
-                member != userId;
-            });
+            let memberId = chat.members.filter((member) => {
+                return member != userId;
+            })[0];
 
-            let member = await User.find({ _id: memberId });
+            let member = await User.findOne({ _id: memberId });
 
             if (member.email) {
                 mailer(member.email, user.username, message);
@@ -342,7 +354,9 @@ app.get(`/friends/possible`, authenticateCheck, async function (req, res) {
 
     try {
         let user = await User.findOne({ _id: id });
-        let posFriends = await User.find({ $and: [{ _id: { $nin: user.friends } }, { _id: { $ne: id } }] });
+        let posFriends = await User.find({
+            $and: [{ _id: { $nin: user.friends } }, { _id: { $ne: id } }],
+        });
 
         if (!user) {
             res.sendStatus(404);
@@ -366,7 +380,9 @@ app.post(`/deleteFriend`, authenticateCheck, async function (req, res) {
         } else {
             let user = await User.findOne({ _id: userId });
             let userFriend = await User.findOne({ _id: userFriendId });
-            let chat = await Chat.deleteOne({ members: { $all: [userId, userFriendId] } });
+            let chat = await Chat.deleteOne({
+                members: { $all: [userId, userFriendId] },
+            });
 
             let uI = user.friends.indexOf(userFriend._id);
             let uFI = userFriend.friends.indexOf(user._id);
@@ -416,6 +432,29 @@ app.post(`/settings/new`, authenticateCheck, async function (req, res) {
             console.log(error);
             res.sendStatus(400);
         }
+    }
+});
+
+app.post(`/addEmail`, authenticateCheck, async function (req, res) {
+    let email = req.body.email;
+    let userId = req.user.id;
+
+    try {
+        if (email.includes('@') && email.includes('.')) {
+            let user = await User.findOne({_id: userId})
+
+            user.email = email
+
+            user.save()
+
+            res.sendStatus(200)
+        } else {
+            res.sendStatus(405)
+        }
+    } catch (error) {
+        console.log(error);
+        
+        res.sendStatus(400);
     }
 });
 
