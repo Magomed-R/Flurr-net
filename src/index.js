@@ -12,7 +12,7 @@ const mongoose = require(`mongoose`);
 let cors = require("cors");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(`public`));
+app.use(express.static(`uploads`));
 app.use(express.json());
 
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
@@ -37,8 +37,33 @@ let New = require("./Models/New");
 
 let mailer = require("./nodemailer");
 
+let multer = require("multer");
+
+const crypto = require('crypto');
+
+function stringToNumber(string) {
+    const hash = crypto.createHash("sha256");
+    hash.update(string);
+    const hashedString = hash.digest("hex");
+    const number = BigInt(`0x${hashedString}`);
+    return number.toString().slice(0, 12);
+}
+let storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, __dirname + "/../uploads");
+    },
+    filename: function (req, file, callback) {
+        callback(null, stringToNumber(file.originalname));
+    },
+});
+let upload = multer({ storage: storage });
+
 app.post(`/auth`, authenticateCheck, (req, res) => {
     res.sendStatus(200);
+});
+
+app.post("/upload", authenticateCheck, upload.single("file"), async function (req, res) {
+    res.send(stringToNumber(req.file.originalname));
 });
 
 app.post(`/login`, authCheck, async (req, res) => {
@@ -273,7 +298,7 @@ app.post("/news", authenticateCheck, async function (req, res) {
 app.delete("/news", authenticateCheck, async function (req, res) {
     try {
         let news = await New.findOne({ _id: req.body.id }).populate("author");
-        
+
         if (req.user.id == news.author._id) {
             await New.deleteOne({ _id: req.body.id });
 
