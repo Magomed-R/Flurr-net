@@ -20,14 +20,10 @@ app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 const chalk = require("chalk");
 
 try {
-    app.listen(port, () =>
-        console.log(chalk.bgGreen(`server started on port ${port}`))
-    );
+    app.listen(port, () => console.log(chalk.green.bold(`server started on port ${port}`)));
     mongoose
-        .connect(
-            `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`
-        )
-        .then((res) => console.log(chalk.bgGreen("Connected to DB")))
+        .connect(`mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster.dvfjqpc.mongodb.net/flurr`)
+        .then((res) => console.log(chalk.green.bold("Connected to DB")))
         .catch((error) => console.log(error));
 } catch (error) {
     console.log(error);
@@ -175,13 +171,22 @@ app.get(`/news/all`, authenticateCheck, async function (req, res) {
     }
 });
 
+app.get("/news/my", authenticateCheck, async function (req, res) {
+    try {
+        let news = await New.find({ author: req.query.id }).sort({ createdAt: -1 }).populate("author");
+
+        res.send(news);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+});
+
 app.get(`/news/one`, authenticateCheck, async function (req, res) {
     let id = req.query.id;
 
     try {
-        let news = await New.findOne({ _id: id })
-            .populate("author")
-            .populate("comments.user");
+        let news = await New.findOne({ _id: id }).populate("author").populate("comments.user");
         res.send(news);
     } catch (error) {
         console.log(error);
@@ -246,6 +251,37 @@ app.post(`/news/likeNews`, authenticateCheck, async function (req, res) {
     } catch (error) {
         console.log(error);
         res.sendStatus(404);
+    }
+});
+
+app.post("/news", authenticateCheck, async function (req, res) {
+    try {
+        let news = new New({
+            author: req.user.id,
+            content: req.body.content,
+            likes: 0,
+            comments: [],
+        });
+
+        news.save();
+        return res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+app.delete("/news", authenticateCheck, async function (req, res) {
+    try {
+        let news = await New.findOne({ _id: req.body.id }).populate("author");
+        
+        if (req.user.id == news.author._id) {
+            await New.deleteOne({ _id: req.body.id });
+
+            return res.sendStatus(200);
+        }
+        res.sendStatus(404);
+    } catch (error) {
+        console.log(error);
     }
 });
 
@@ -440,20 +476,20 @@ app.post(`/addEmail`, authenticateCheck, async function (req, res) {
     let userId = req.user.id;
 
     try {
-        if (email.includes('@') && email.includes('.')) {
-            let user = await User.findOne({_id: userId})
+        if (email.includes("@") && email.includes(".")) {
+            let user = await User.findOne({ _id: userId });
 
-            user.email = email
+            user.email = email;
 
-            user.save()
+            user.save();
 
-            res.sendStatus(200)
+            res.sendStatus(200);
         } else {
-            res.sendStatus(405)
+            res.sendStatus(405);
         }
     } catch (error) {
         console.log(error);
-        
+
         res.sendStatus(400);
     }
 });
