@@ -53,7 +53,7 @@ let storage = multer.diskStorage({
         callback(null, __dirname + "/../uploads");
     },
     filename: function (req, file, callback) {
-        callback(null, stringToNumber(file.originalname));
+        callback(null, stringToNumber(file.originalname) + ".png");
     },
 });
 let upload = multer({ storage: storage });
@@ -63,7 +63,7 @@ app.post(`/auth`, authenticateCheck, (req, res) => {
 });
 
 app.post("/upload", authenticateCheck, upload.single("file"), async function (req, res) {
-    res.send(stringToNumber(req.file.originalname));
+    res.send(stringToNumber(req.file.originalname) + ".png");
 });
 
 app.post(`/login`, authCheck, async (req, res) => {
@@ -223,7 +223,6 @@ app.post(`/news/newComment`, authenticateCheck, async function (req, res) {
     let userId = req.body.userId;
     let newsId = req.body.newsId;
     let text = req.body.text;
-
     try {
         let user = await User.findOne({ _id: userId });
         let news = await New.findOne({ _id: newsId });
