@@ -1,4 +1,4 @@
-let { Schema, model, ObjectId } = require("mongoose");
+import { Schema, model } from "mongoose";
 
 const userSchema = new Schema(
     {
@@ -22,13 +22,13 @@ const userSchema = new Schema(
         likedNews: [String],
         friends: [
             {
-                type: ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "user"
             }
         ],
         chats: [
             {
-                type: ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "chat"
             }
         ]
@@ -40,4 +40,4 @@ const userSchema = new Schema(
 
 const User = model(`user`, userSchema);
 
-module.exports = User;
+export default User;

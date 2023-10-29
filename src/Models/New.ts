@@ -1,17 +1,24 @@
-let { Schema, model, ObjectId } = require("mongoose");
+import { Schema, model } from "mongoose";
 
 const newSchema = new Schema(
     {
         author: {
-            type: ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "user"
         },
-        content: String,
-        likes: Number,
+        content: {
+            type: String,
+            required: true
+        },
+        likes: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
         comments: [
             {
                 user: {
-                    type: ObjectId,
+                    type: Schema.Types.ObjectId,
                     ref: "user"
                 },
                 text: {
@@ -29,4 +36,4 @@ const newSchema = new Schema(
 
 const New = model(`new`, newSchema);
 
-module.exports = New;
+export default New;
