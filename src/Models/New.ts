@@ -1,39 +1,52 @@
 import { Schema, model } from "mongoose";
+import { IUser } from "./User";
 
 const newSchema = new Schema(
     {
         author: {
             type: Schema.Types.ObjectId,
-            ref: "user"
+            ref: "user",
         },
         content: {
             type: String,
-            required: true
+            required: true,
         },
         likes: {
             type: Number,
             default: 0,
-            min: 0
+            min: 0,
         },
         comments: [
             {
                 user: {
                     type: Schema.Types.ObjectId,
-                    ref: "user"
+                    ref: "user",
                 },
                 text: {
                     type: String,
-                    required: true
+                    required: true,
                 },
-                createdAt: Date
-            }
-        ]
+                createdAt: Date,
+            },
+        ],
     },
     {
-        timestamps: true
+        timestamps: true,
     }
 );
 
-const New = model(`new`, newSchema);
+export const New = model(`new`, newSchema);
 
-export default New;
+export interface INew {
+    _id: string,
+    author: IUser,
+    content: string,
+    likes: number,
+    comments: [
+        {
+            user: IUser;
+            text: string;
+            createdAt: Date;
+        }
+    ]
+}

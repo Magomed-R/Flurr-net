@@ -8,28 +8,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 let newsRouter = (0, express_1.Router)();
-const New_1 = __importDefault(require("../Models/New"));
-const User_1 = __importDefault(require("../Models/User"));
+const New_1 = require("../Models/New");
+const User_1 = require("../Models/User");
 newsRouter
     .route("/")
     .get(function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let news = yield New_1.default.find().sort({ createdAt: -1 }).populate({ path: "author", model: User_1.default });
+        let news = yield New_1.New.find().sort({ createdAt: -1 }).populate({ path: "author", model: User_1.User });
         res.send(news);
     });
 })
     .post(function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        let news = new New_1.New({
+            author: req.body.uid,
+            content: req.body.content,
+            likes: 0,
+            comments: [],
+        });
+        news.save();
+        res.sendStatus(200);
+    });
+})
+    .delete(function (req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let news = yield New_1.New.findOne({ _id: req.body.id }).populate("author");
+        if (!news)
+            res.sendStatus(404);
+        if (req.body.uid != news.author._id)
+            return res.sendStatus(403);
+        yield New_1.New.deleteOne({ _id: req.body.id });
+        return res.sendStatus(200);
+    });
 });
 newsRouter.route("/:id").get(function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let news = yield New_1.default.findOne({ _id: req.params.id }).populate({ path: "author", model: User_1.default }).populate({ path: "comments.user", model: User_1.default });
+        let news = yield New_1.New.findOne({ _id: req.params.id })
+            .populate({ path: "author", model: User_1.User })
+            .populate({ path: "comments.user", model: User_1.User });
         res.send(news);
     });
 });

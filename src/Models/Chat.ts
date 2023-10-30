@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { IUser } from "./User";
 
 const chatSchema = new Schema(
     {
@@ -21,6 +22,16 @@ const chatSchema = new Schema(
     }
 );
 
-const Chat = model(`chat`, chatSchema);
+export const Chat = model(`chat`, chatSchema);
 
-export default Chat;
+export interface IChat {
+    _id?: string,
+    members: IUser[];
+    messages: [
+        {
+            from: String;
+            message: String;
+            createdAt: Date;
+        }
+    ];
+}
